@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- 引入vue -->
+    <script type="text/javascript" src="../../plugins/vue/vue.js"></script>
+    <!-- 引入axios -->
+    <script type="text/javascript" src="../../plugins/axios/axios.min.js"></script>
+    <!-- 引入element-ui -->
+    <script type="text/javascript" src="../../plugins/element-ui/index.js"></script>
+    <link rel="stylesheet" href="../../plugins/element-ui/index.css"/>
+    <!-- 引入自定义的js文件 -->
+    <script type="text/javascript" src="../../js/index.js"></script>
+    <script type="text/javascript" src="../../api/order.js"></script>
+    <script type="text/javascript" src="../../js/request.js"></script>
+    <script type="text/javascript" src="../../js/validate.js"></script>
+    <!-- 引入自定义的css文件 -->
+    <link rel="stylesheet" href="../../styles/common.css"/>
+    <title>订单</title>
+    <style>
+        /* 设置搜索框的样式 */
+        .tableBar {
+            margin-bottom: 20px;
+        }
+
+        /* 设置整体容器的样式 */
+        .container {
+            padding: 30px 28px;
+            background-color: #fff;
+        }
+
+        /* 分页插件 */
+        .pageList {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        /* 设置table表格的边框 */
+        .tableBox {
+            border-radius: 2px;
+            border: solid 2px #f3f4f7;
+            width: 100%;
+        }
+
+        /* 设置详情和编辑的字体 */
+        .el-button--text {
+            font-size: 13px;
+        }
+
+        .el-table td {
+            font-size: 13px;
+        }
+    </style>
+</head>
+<body>
+<div id="order-app">
+    <div class="container">
+        <!-- 搜索项 -->
+        <div class="tableBar">
+            <el-input v-model="orderId" placeholder="请输入订单号" style="width: 250px">
+                <i slot="prefix" class="el-input__icon el-icon-search" style="cursor: pointer" @click="init"></i>
+            </el-input>
+            <el-date-picker v-model="orderTime"
+                            clearable
+                            value-format="yyyy-MM-dd HH:mm:ss"
+                            type="datetimerange"
+                            placeholder="选择日期"
+                            range-separator="至"
+                            start-placeholder="开始日期"
+                            end-placeholder="结束日期"
+                            :default-time="['00:00:00', '23:59:59']"
+                            style="width: 400px;margin-left: 20px;"
+            ></el-date-picker>
+            <el-button type="primary" class="search-btn" @click="init">查询</el-button>
+        </div>
+
+        <!-- 表格 -->
+        <el-table stripe class="tableBox" stripe :data="orderList">
+            <el-table-column label="订单号" prop="id" align="center"></el-table-column>
+            <el-table-column label="用户名" prop="username" align="center"></el-table-column>
+            <el-table-column label="订单状态" prop="status" align="center">
+                <template slot-scope="scope">
+                    {{ getStatus(scope.row.status) }}
+                </template>
+            </el-table-column>
+            <el-table-column label="操作" align="center">
+                <template slot-scope="scope">
+                    <el-button
+                            type="text"
+                            size="small"
+                            class="blueBug"
+                            @click="showDialog(scope.row)"
+                    >查看详情
+                    </el-button>
+                </template>
+
+            </el-table-column>
+        </el-table>
+
+        <el-pagination
+                class="pageList"
+                :page-sizes="[10, 20, 30, 40]"
+                :page-size="pageSize"
+                :current-page.sync="page"
+                layout="total, sizes, prev, pager, next, jumper"
+                :total="counts"
+                @size-change="handleSizeChange"
+                @current-change="handleCurrentChange"
+        ></el-pagination>
+
+        <!-- 查看详情 -->
+        <el-dialog
+                title="订单信息"
+                :visible.sync="dialogVisible"
+                width="30%"
+                :before-close="handleClose"
+        >
+            <el-form ref="diaForm" :model="orderForm" class="dia-form" label-position="right" label-width="80px">
+                <el-form-item label="订单号: ">
+                    <span>{{ orderForm.id }}</span>
+                </el-form-item>
+                <el-form-item label="用户名: ">
+                    <span>{{ orderForm.username }}</span>
+                </el-form-item>
+                <el-form-item label="联系电话: ">
+                    <span>{{ orderForm.phone }}</span>
+                </el-form-item>
+                <el-form-item label="地址: ">
+                    <span>{{ orderForm.address }}</span>
+                </el-form-item>
+                <el-form-item label="下单时间: ">
+                    <span>{{ orderForm.createTime }}</span>
+                </el-form-item>
+                <el-form-item label="购买数量: ">
+                    <span>{{ orderForm.totalCount }}本</span>
+                </el-form-item>
+                <el-form-item label="支付金额: ">
+                    <span>￥{{ orderForm.totalAmount }}元</span>
+                </el-form-item>
+                <el-form-item label="订单状态: ">
+                    <span>{{ getStatus(orderForm.status) }}</span>
+                </el-form-item>
+            </el-form>
+        </el-dialog>
+
+    </div>
+</div>
+
+<script>
+    const vm = new Vue({
+        el: "#order-app",
+        data() {
+            return {
+                // 订单号
+                orderId: "",
+                // 2022-05-03 00:00:00,2022-05-05 23:59:59
+                orderTime: "",
+                // 开始时间
+                beginTime: "",
+                // 结束时间
+                endTime: "",
+                // 订单列表
+                orderList: [],
+                // 页码
+                page: 1,
+                // 页码数量
+                pageSize: 10,
+                // 总数量
+                counts: 0,
+                // 详情表单
+                orderForm: {},
+                dialogVisible: false,
+            }
+        },
+        methods: {
+            // 页面初始化
+            async init() {
+                getOrderList({
+                    page: this.page,
+                    pageSize: this.pageSize,
+                    orderId: this.orderId || undefined,
+                    beginTime: this.beginTime || undefined,
+                    endTime: this.endTime || undefined
+                }).then(res => {
+                    if (String(res.code) === "1") {
+                        this.orderList = res.data.records;
+                        this.counts = Number(res.data.total)
+                        for (let order of this.orderList) {
+                            axios({
+                                method: "GET",
+                                url: "/user/" + order.userId
+                            }).then(res => {
+                                // 让vue重新渲染
+                                this.$set(order, order.username, res.data.data.username);
+                                order["username"] = res.data.data.username;
+                                order["phone"] = res.data.data.phone;
+                                order["address"] = res.data.data.address;
+                            })
+                        }
+                    } else {
+                        this.$message({
+                            type: "error",
+                            message: res.msg,
+                            duration: 2000
+                        })
+                    }
+                })
+            },
+            // 处理一页显示数量变化方法
+            handleSizeChange(pageSize) {
+                // 改变 页面数量 后重新发送请求
+                this.pageSize = pageSize;
+                this.init();
+            },
+            // 处理当前页面变化方法
+            handleCurrentChange(page) {
+                // 改变 页码 后重新发送请求
+                this.page = page;
+                this.init();
+            },
+            // 处理订单状态
+            getStatus(status) {
+                switch (status) {
+                    case 0:
+                        return "未付款";
+                    case 1:
+                        return "已付款";
+                    case 2:
+                        return "正在配送";
+                    case 3:
+                        return "已签收";
+                    case 4:
+                        return "正在退回";
+                }
+            },
+            showDialog(row) {
+                this.dialogVisible = true;
+                this.orderForm = row;
+            }
+        },
+        created() {
+            // 初始化页面，获取订单列表
+            this.init();
+        },
+        watch: {
+            orderTime(val) {
+                if (val && val.length >= 2) {
+                    this.beginTime = val[0]
+                    this.endTime = val[1]
+                } else {
+                    this.beginTime = ''
+                    this.endTime = ''
+                }
+            }
+        }
+    });
+</script>
+</body>
+</html>

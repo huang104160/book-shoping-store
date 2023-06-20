@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>我的购物车</title>
+    <link rel="shortcut icon" href="../../favicon.ico">
+    <link rel="stylesheet" href="../../style/cart/shoppingCart.css">
+    <script type="text/javascript" src="../../plugins/jQuery/jquery-3.6.0.js"></script>
+    <script type="text/javascript" src="../../plugins/vue/vue.js"></script>
+    <script type="text/javascript" src="../../plugins/axios/axios.js"></script>
+    <!-- 引入样式 -->
+    <link rel="stylesheet" href="../../plugins/element-ui/index.css">
+    <!-- 引入组件库 -->
+    <script src="../../plugins/element-ui/index.js"></script>
+    <!-- 引入layer -->
+    <script src="../../plugins/layer-master/dist/layer.js"></script>
+    <style>
+        .el-table {
+            margin: 0 auto;
+        }
+
+    </style>
+    <style>
+        .nav-item.active {
+            color: orange;
+        }
+    </style>
+</head>
+<body>
+<div id="app">
+    <nav class="public-header">
+        <a class="nav-item" href="../../index.html">网站首页</a>
+        <a class="nav-item" href="../cart/shoppingCart.html">购物车</a>
+        <a class="nav-item" href="../myorder/myorder.html">我的订单</a>
+        <a class="nav-item" href="../myInfo/myInfo.html">我的信息</a>
+    </nav>
+    <div class="cart">
+        <template>
+            <el-table
+                    ref="multipleTable"
+                    :data="cartItems"
+                    tooltip-effect="dark"
+                    style="width: 87%"
+                    @selection-change="handleSelectionChange"
+            >
+                <el-table-column
+                        type="selection"
+                        width="55"
+                        align="center"
+                >
+                </el-table-column>
+                <el-table-column
+                        label="商品"
+                        width="220"
+                        align="center"
+                >
+                    <template slot-scope="scope">
+                        <img width="120px" :src=`http:${scope.row.imageName}`>
+                    </template>
+                </el-table-column>
+                <el-table-column
+                        label="书名"
+                        align="center"
+                >
+                    <template slot-scope="scope">
+                        {{scope.row.name}}
+                    </template>
+                </el-table-column>
+                <el-table-column
+                        label="出版社"
+                        align="center"
+                >
+                    <template slot-scope="scope">
+                        {{scope.row.publisher}}
+                    </template>
+                </el-table-column>
+                <el-table-column
+                        prop="price"
+                        label="单价"
+                        width="120"
+                        align="center"
+                >
+                    <template slot-scope="scope">￥{{ scope.row.price }}元</template>
+                </el-table-column>
+                <el-table-column
+                        prop="number"
+                        label="数量"
+                        show-overflow-tooltip
+                        align="center"
+                        width="200px"
+                >
+                    <template slot-scope="scope">
+                        <el-button size="mini" type="danger" @click="cartQuantityMinus(scope.row)">-1</el-button>
+                        <input type="text"
+                               style="width: 50px; height: 23px"
+                               v-model.number="scope.row.number"
+                               @change="OutOfFocus(scope.row)"
+                               @keydown.enter="OutOfFocus(scope.row)"
+                        >
+                        <el-button size="mini" type="success" @click="cartQuantityPlus(scope.row)">+1</el-button>
+                    </template>
+
+                </el-table-column>
+                <el-table-column
+                        prop="address"
+                        label="小计"
+                        show-overflow-tooltip
+                        align="center"
+                        width="120"
+                >
+                    <template slot-scope="scope">￥{{ (scope.row.price * scope.row.number).toFixed(2) }}元</template>
+                </el-table-column>
+                <el-table-column
+                        prop="address"
+                        label="操作"
+                        show-overflow-tooltip
+                        align="center"
+                        width="120"
+                >
+                    <template slot-scope="scope">
+                        <el-button
+                                size="mini"
+                                type="danger"
+                                @click="deleteItem(scope.row)"
+                                align="center"
+                        >删除
+                        </el-button>
+                    </template>
+                </el-table-column>
+            </el-table>
+            <el-button type="danger" class="dangers" v-if="cartItems.length > 0" id="batchDeleteBtn"
+                       @click="batchDelete">批量删除
+            </el-button>
+            <div class="cart-btn"><span>总价：</span><span> ¥{{totalPrice}} </span>
+                <button class="btn" @click="settleAccounts">去结算</button>
+            </div>
+        </template>
+        <!-- 页脚部分 -->
+        <div class="extra">
+            <div class="wrapper">
+                <!-- 版权信息 -->
+                <div class="copyright">
+                    <p>
+                        <a href="javascript:;">关于我们</a>
+                        <a href="javascript:;">帮助中心</a>
+                        <a href="javascript:;">售后服务</a>
+                        <a href="javascript:;">配送与验收</a>
+                        <a href="javascript:;">商务合作</a>
+                        <a href="javascript:;">搜索推荐</a>
+                        <a href="javascript:;">友情链接</a>
+                    </p>
+                    <p>CopyRight &copy; 网上书城</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const vm = new Vue({
+        el: "#app",
+        data: {
+            userId: "",
+            // 购物车列表
+            cartItems: [],
+            // 选中了的购物项列表
+            selectedItemList: []
+        },
+        methods: {
+            // 购物车数量减1
+            cartQuantityMinus(row) {
+                if (row.number > 1) {
+                    axios({
+                        method: "put",
+                        url: "/cart",
+                        data: {
+                            id: row.id,
+                            number: row.number - 1
+                        }
+                    }).then(res => {
+                        if (res.data.code == "1") {
+                            row.number--;
+                        } else {
+                            this.$message({
+                                message: "数量修改失败",
+                                type: 'error',
+                                duration: 1000
+                            });
+                        }
+                    })
+                } else {
+                    this.$message({
+                        message: "购物车数量至少为1",
+                        type: 'error',
+                        duration: 1000
+                    });
+                    row.number = 1
+                }
+            },
+            // 购物车数量加1
+            cartQuantityPlus(row) {
+                axios({
+                    method: "put",
+                    url: "/cart",
+                    data: {
+                        id: row.id,
+                        number: row.number + 1
+                    },
+                }).then(res => {
+                    if (res.data.code == "1") {
+                        row.number++;
+                    } else {
+                        this.$message({
+                            message: "数量修改失败",
+                            type: 'error',
+                            duration: 1000
+                        });
+                    }
+                })
+            },
+            // input数量修改失焦事件
+            OutOfFocus(row) {
+                if (row.number >= 1) {
+                    axios({
+                        method: "put",
+                        url: "/cart",
+                        data: {
+                            id: row.id,
+                            number: row.number
+                        }
+                    }).then(res => {
+                        if (res.data.code == "1") {
+                            this.$message({
+                                message: "数量修改成功",
+                                type: 'success',
+                                duration: 1000
+                            });
+                        } else {
+                            this.$message({
+                                message: "数量修改失败",
+                                type: 'error',
+                                duration: 1000
+                            });
+                        }
+                    })
+                } else {
+                    this.$message({
+                        message: "购物车数量至少为1",
+                        type: 'error',
+                        duration: 1000
+                    });
+                    row.number = 1
+                }
+            },
+            // 获取所有被选中的购物项
+            handleSelectionChange(items) {
+                this.selectedItemList = items;
+            },
+            // 获取购物车列表
+            getAllCartItems() {
+                let userInfo = JSON.parse(localStorage.getItem("userInfo"));
+                if (userInfo) {
+                    this.userId = userInfo.id;
+                    axios({
+                        method: "GET",
+                        url: "/cart/list?id=" + userInfo.id
+                    }).then(res => {
+                        if (res.data.code == "1") {
+                            this.cartItems = res.data.data;
+                        } else {
+                            this.$message({
+                                type: "error",
+                                message: res.data.msg,
+                                duration: "2000",
+                                onClose: () => {
+                                    location.href = "../login/login.html";
+                                }
+                            })
+                        }
+                    })
+                } else {
+                    this.$message({
+                        type: "error",
+                        message: "请先登录",
+                        duration: "2000",
+                        onClose: () => {
+                            location.href = "../login/login.html";
+                        }
+                    })
+                }
+
+            },
+            // 删除图书
+            deleteItem(row) {
+                // 1. 确定是否删除
+                this.$confirm(`您确定要删除【${row.name}】图书吗?`, '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
+                    // 2. 删除对应图书项
+                    axios({
+                        method: "delete",
+                        url: "/cart?ids=" + row.id
+                    }).then(res => {
+                        if (res.data.code == "1") {
+                            // 2.1 删除成功提示
+                            this.$message({
+                                type: 'success',
+                                message: '删除成功!'
+                            });
+                        } else {
+                            console.log(res)
+                            // 2.2 删除失败提示
+                            this.$message({
+                                type: 'error',
+                                message: '删除失败!'
+                            });
+                        }
+                        // 3. 重新发送请求获取购物车列表
+                        this.getAllCartItems();
+                    })
+                }).catch(() => {
+                    // 3. 点击取消按钮提示
+                    this.$message({
+                        type: 'info',
+                        message: '已取消删除'
+                    });
+                });
+            },
+            // 批量删除
+            batchDelete() {
+                if (this.selectedItemList.length <= 0) {
+                    return;
+                }
+                // 1. 确定是否删除
+                this.$confirm('您确定要删除这' + this.selectedItemList.length + '个购物项吗?', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
+                    let ids = [];
+                    this.selectedItemList.forEach(item => {
+                        ids.push(item.id);
+                    });
+                    // 2. 删除对应图书项
+                    axios({
+                        method: "delete",
+                        url: "/cart?ids=" + ids.join(",")
+                    }).then(res => {
+                        if (res.data.code == "1") {
+                            // 2.1 删除成功提示
+                            this.$message({
+                                type: 'success',
+                                message: '删除成功!'
+                            });
+                        } else {
+                            console.log(res)
+                            // 2.2 删除失败提示
+                            this.$message({
+                                type: 'error',
+                                message: '删除失败!'
+                            });
+                        }
+                        // 3. 重新发送请求获取购物车列表
+                        this.getAllCartItems();
+                    })
+                }).catch(() => {
+                    // 3. 点击取消按钮提示
+                    this.$message({
+                        type: 'info',
+                        message: '已取消删除'
+                    });
+                });
+            },
+            // 结账
+            settleAccounts() {
+                if (this.selectedItemList.length <= 0) {
+                    return this.$message({
+                        message: "请选择您要结算的商品",
+                        type: "warning",
+                        duration: 2000
+                    })
+                }
+                let bookCounts = this.selectedItemList.reduce((sum, item) => {
+                    sum += Number(item.number);
+                    return sum;
+                }, 0);
+                this.$confirm(`您确定要结账吗？【有${this.selectedItemList.length}个购物项，共${bookCounts}本图书】`, '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
+                    axios({
+                        method: "POST",
+                        url: "/order?userId=" + this.userId,
+                        data: this.selectedItemList
+                    }).then(res => {
+                        if (res.data.code == "1") {
+                            this.getAllCartItems();
+                            this.$message({
+                                message: res.data.msg,
+                                type: "success",
+                                duration: 2000
+                            })
+                        } else {
+                            this.$message({
+                                message: res.data.msg,
+                                type: "error",
+                                duration: 2000
+                            });
+                        }
+                    })
+                }).catch(err => {
+                    this.$message({
+                        message: "已取消操作",
+                        type: "info",
+                        duration: 1000
+                    });
+                })
+            },
+            showCurPage(){
+                // 获取当前页面的url
+                let currentUrl = window.location.href;
+                // 获取所有的导航链接
+                let navLinks = document.querySelectorAll('.nav-item');
+
+                // 根据当前url设置激活状态
+                navLinks.forEach(link => {
+                    if (currentUrl.indexOf(link.href)!="-1") {
+                        link.classList.add('active');
+                    }
+                });
+            }
+        },
+        computed: {
+            // 总价格
+            totalPrice() {
+                return this.selectedItemList.reduce((sum, item) => {
+                    sum = parseFloat(sum);
+                    let price = parseFloat(item.price);
+                    let number = parseFloat(item.number);
+                    sum += (price * number);
+                    return sum.toFixed(2);
+                }, 0);
+            },
+        },
+        created() {
+            // 获取用户的购物车列表
+            this.getAllCartItems();
+        },
+        mounted(){
+            this.showCurPage();
+        }
+
+    })
+</script>
+</body>
+</html>

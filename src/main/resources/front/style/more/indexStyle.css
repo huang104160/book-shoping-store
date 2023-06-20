@@ -1,0 +1,352 @@
+    .error {
+        color: red;
+    }
+    
+    body {
+        background-color: #f7f7f6;
+        overflow: -Scroll;
+        overflow-x: hidden
+    }
+    /*设置头部导航栏的样式*/
+    
+    .top-ul {
+        background-color: brown;
+        height: 50px;
+        color: white;
+        margin-bottom: 0px;
+        margin: 0;
+    }
+    
+    .top-ul ul {
+        background-color: rgb(252, 251, 250);
+        border: 1px solid #C0C0C0;
+        position: relative;
+    }
+    
+    .top-ul>li {
+        float: left;
+        top: 15px;
+    }
+    
+    .top-ul>li+li {
+        text-align: center;
+    }
+    
+    .top-ul>li>ul {
+        margin-top: 15px;
+        height: 130px;
+        width: 150px;
+        padding: 15px;
+        position: absolute;
+        z-index: 10;
+    }
+    
+    .top-ul>li>ul>li {
+        margin-bottom: 5px;
+        text-align: center;
+    }
+    /*
+头部导航栏中的链接样式
+*/
+    
+    ul li {
+        list-style: none;
+    }
+    
+    .top-ul a:link {
+        color: white;
+    }
+    
+    .top-ul a:visited {
+        color: white;
+    }
+    
+    .top-ul a:hover {
+        color: white;
+    }
+    
+    .top-ul a:active {
+        color: white;
+    }
+    
+    .badge {
+        background-color: red;
+    }
+    /*搜索框*/
+    
+    .ssq {
+        background-color: #f2f1ea;
+        margin: 0;
+        height: 100px;
+    }
+    
+    .ssq>div {
+        position: relative;
+        top: 20px;
+    }
+    
+    .ssq>div .input-group {
+        position: relative;
+        border: 1px solid red;
+    }
+    
+    .ssq>div .input-group>input {
+        border-radius: 0;
+    }
+    
+    .ssq>div .input-group>input:focus {
+        border: 2px solid red;
+        border-radius: 0;
+    }
+    /*轮播滚动*/
+    
+    .banner {
+        overflow: hidden;
+        position: relative;
+        padding-left: 10px;
+        height: 400px;
+    }
+    
+    .lunbo {
+        position: absolute;
+        height: 400px;
+        padding: 0;
+        top: 0;
+        left: 0;
+        border-left: 100px;
+        border-right: 100px;
+    }
+    
+    .lunbo>li img {
+        height: 400px;
+    }
+    
+    .lunbo>li {
+        float: left;
+    }
+    /* 小圆点样式 */
+    
+    .dot {
+        position: absolute;
+        bottom: 10px;
+        width: 100%;
+        text-align: center;
+        font-size: 0;
+    }
+    
+    .dot li {
+        display: block;
+        display: inline-block;
+        margin: 0 5px;
+        width: 15px;
+        height: 15px;
+        border-radius: 100%;
+        background: rgba(145, 144, 144, .5);
+        cursor: pointer;
+    }
+    
+    .dot .on {
+        background-color: #fff;
+    }
+    /* 左右翻页箭头样式 */
+    
+    .arrow {
+        display: none;
+    }
+    
+    .arrow span {
+        display: block;
+        width: 50px;
+        height: 100px;
+        background: rgba(0, 0, 0, .6);
+        color: #fff;
+        text-align: center;
+        font-size: 40px;
+        line-height: 100px;
+        cursor: pointer;
+    }
+    
+    .arrow .prev {
+        position: absolute;
+        top: 50%;
+        left: 0;
+        margin-top: -50px;
+    }
+    
+    .arrow .next {
+        position: absolute;
+        top: 50%;
+        right: 0;
+        margin-top: -50px;
+    }
+    
+    .nav {
+        font-size: 18px;
+    }
+    /*底部广告*/
+    
+    .digg {
+        background-color: rgba(0, 0, 0, .6);
+        display: table-cell;
+        vertical-align: middle;
+        text-align: center;
+    }
+    
+    .digg>span {
+        display: inline-block;
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        font-size: 32px;
+        color: white;
+    }
+    
+    .test {
+        white-space: nowrap;
+        overflow: hidden;
+    }
+    /* .thumbnail{
+    width: 180px;
+    height: 180px;
+}
+.thumbnail>img{
+    width: 180px;
+    height: 170px;
+} */
+    /*
+以下是info2.html中的样式
+*/
+    
+    .media-object {
+        width: 350px;
+    }
+    
+    .media {
+        margin-top: 5px;
+        padding-top: 15px;
+    }
+    
+    /* .media-heading>span {
+        color: red;
+    } */
+    
+    .media-heading {
+        font-weight: bold;
+    }
+    
+    .info {
+        word-wrap: break-word;
+        font-size: 20px;
+        font-weight: 100;
+    }
+    
+    #author>span,
+    #press>span,
+    #p_time>span {
+        color: #4169E1;
+    }
+    
+    #jg {
+        color: red;
+        font-size: 24px;
+        margin-top: 30px;
+    }
+    
+    #yj {
+        font-size: 16px;
+        color: darkgrey;
+        text-decoration: line-through;
+    }
+    
+    .gw-btn {
+        background-color: red;
+        color: white;
+    }
+    .class2{
+        background-color: rgb(137 130 130);
+        color:white;
+    }
+    .class2:hover{
+        color: white;
+    }
+    .gw-btn:hover {
+        background-color: rgba(255, 0, 0, 0.8);
+        color: white;
+    }
+    
+    #daojishi {
+        background-image: url('../images/countdown.jpg');
+        background-repeat: no-repeat;
+        margin-top: 10px;
+        margin-bottom: 10px;
+        height: 70px;
+        text-align: center;
+        color: white;
+    }
+    
+    #daojishi>div {
+        display: inline-block;
+    }
+    
+    #daojishi>.col {
+        background-color: white;
+        color: red;
+        width: 18px;
+        height: 18px;
+        margin: 10px 0px 10px 0px;
+    }
+    
+    #bottom {
+        text-align: center;
+        color: #000;
+        margin-top: 45px;
+    }
+    /* //图片放大显示框样式 */
+    
+    #div-media {
+        position: relative;
+    }
+    
+    #div-tog {
+        position: absolute;
+        height: 500px;
+        width: 450px;
+        top: -10px;
+        left: 350px;
+        background-color: white;
+        display: none;
+        z-index: 10;
+        overflow: hidden;
+        background: rgba(254, 238, 167, 0);
+    }
+    
+    #div-tog>img {
+        position: absolute;
+    }
+    /* 缩略图放大镜框 */
+    
+    #magnifier {
+        width: 160px;
+        height: 160px;
+        background: rgba(254, 238, 167, .4);
+        /* 半透明效果 */
+        position: absolute;
+        left: 0;
+        top: 0;
+        display: none;
+    }
+    
+    .more_media_img {
+        margin-right: 19px;
+        width: 200px;
+        border: 1px solid black;
+        box-shadow: 3px 6px 15px black;
+    }
+    .media, .media-body {
+     overflow: visible;
+     margin-top:10px;
+    }
+    #dimg {
+        width: 800px;
+        height: 800px;
+    }

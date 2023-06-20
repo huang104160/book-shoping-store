@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>我的订单</title>
+    <link rel="shortcut icon" href="../../favicon.ico">
+    <link rel="stylesheet" href="../../style/cart/shoppingCart.css">
+    <script type="text/javascript" src="../../plugins/jQuery/jquery-3.6.0.js"></script>
+    <script type="text/javascript" src="../../plugins/vue/vue.js"></script>
+    <script type="text/javascript" src="../../plugins/axios/axios.js"></script>
+    <!-- 引入样式 -->
+    <link rel="stylesheet" href="../../plugins/element-ui/index.css">
+    <!-- 引入组件库 -->
+    <script src="../../plugins/element-ui/index.js"></script>
+    <!-- 引入layer -->
+    <script src="../../plugins/layer-master/dist/layer.js"></script>
+    <style>
+        .el-table {
+            margin: 0 auto;
+        }
+        .multi-line-cell {
+            white-space: normal !important;
+            word-break: break-all;
+            word-wrap: break-word;
+        }
+    </style>
+    <style>
+        .nav-item.active {
+            color: orange;
+        }
+    </style>
+</head>
+<body>
+<div id="app">
+    <nav class="public-header">
+        <a class="nav-item" href="../../index.html">网站首页</a>
+        <a class="nav-item" href="../cart/shoppingCart.html">购物车</a>
+        <a class="nav-item" href="../myorder/myorder.html">我的订单</a>
+        <a class="nav-item" href="../myInfo/myInfo.html">我的信息</a>
+    </nav>
+    <div class="cart">
+        <template>
+            <el-table
+                    ref="multipleTable"
+                    :data="orderItems"
+                    tooltip-effect="dark"
+                    style="width: 87%"
+                    @selection-change="handleSelectionChange"
+            >
+                <el-table-column
+                        type="selection"
+                        width="45"
+                        align="center"
+                >
+                </el-table-column>
+                <el-table-column
+                        label="商品"
+                        width="220"
+                        align="center"
+                >
+                    <template slot-scope="scope">
+                        <img width="120px" :src=`http:${scope.row.imageName}`>
+                    </template>
+                </el-table-column>
+                <el-table-column
+                        label="书名"
+                        align="center"
+                        width="180"
+                >
+                    <template slot-scope="scope">
+                        {{scope.row.name}}
+                    </template>
+                </el-table-column>
+                <el-table-column
+                        label="出版社"
+                        align="center"
+                        width="120"
+                >
+                    <template slot-scope="scope">
+                        {{scope.row.publisher}}
+                    </template>
+                </el-table-column>
+
+                <el-table-column
+                        label="供货商"
+                        align="center"
+                        width="100"
+                >
+                    <template slot-scope="scope">
+                        {{scope.row.supplier}}
+                    </template>
+                </el-table-column>
+
+                <el-table-column
+                        prop="price"
+                        label="单价"
+                        width="120"
+                        align="center"
+                >
+                    <template slot-scope="scope">￥{{ scope.row.price }}元</template>
+                </el-table-column>
+                <el-table-column
+                        prop="number"
+                        label="数量"
+                        show-overflow-tooltip
+                        align="center"
+                        width="120px"
+                >
+                    <template slot-scope="scope">
+
+                        {{scope.row.number}}件
+
+                    </template>
+
+                </el-table-column>
+                <el-table-column
+                        prop="address"
+                        label="小计"
+                        show-overflow-tooltip
+                        align="center"
+                        width="120"
+                >
+                    <template slot-scope="scope">￥{{ (scope.row.price * scope.row.number).toFixed(2) }}元</template>
+                </el-table-column>
+                <el-table-column
+                        prop="address"
+                        label="发货信息"
+                        show-overflow-tooltip
+                        align="center"
+                        width="240"
+                >
+                    <template slot-scope="scope">
+<!--                        {{ (scope.row.sendfrom)}} -> {{scope.row.sendto}}-->
+                        <div class="multi-line-cell">{{ (scope.row.sendfrom)}} -> {{scope.row.sendto}}</div>
+                    </template>
+                </el-table-column>
+                <el-table-column
+                        prop="address"
+                        label="发货时间"
+                        show-overflow-tooltip
+                        align="center"
+                        width="240"
+                >
+                    <template slot-scope="scope">
+                        <!--                        {{ (scope.row.sendfrom)}} -> {{scope.row.sendto}}-->
+                        <div class="multi-line-cell">{{ (scope.row.createTime)}}</div>
+                    </template>
+                </el-table-column>
+                <el-table-column
+                        prop="address"
+                        label="操作"
+                        show-overflow-tooltip
+                        align="center"
+                        width="120"
+                >
+
+                    <template slot-scope="scope">
+                        <el-button
+                                size="mini"
+                                type="danger"
+                                @click="GottenItem(scope.row)"
+                                align="center"
+                        >确认收货
+                        </el-button>
+                    </template>
+                </el-table-column>
+            </el-table>
+            <el-button type="danger" style="margin-right: 160px; margin-top: 10px; " class="dangers" v-if="orderItems.length > 0" id="batchGottenBtn"
+                       @click="batchGotten">批量收货
+            </el-button>
+            <div class="cart-btn"><span>总价：</span><span> ¥{{totalPrice}} </span>
+
+            </div>
+        </template>
+        <!-- 页脚部分 -->
+        <div class="extra">
+            <div class="wrapper">
+                <!-- 版权信息 -->
+                <div class="copyright">
+                    <p>
+                        <a href="javascript:;">关于我们</a>
+                        <a href="javascript:;">帮助中心</a>
+                        <a href="javascript:;">售后服务</a>
+                        <a href="javascript:;">配送与验收</a>
+                        <a href="javascript:;">商务合作</a>
+                        <a href="javascript:;">搜索推荐</a>
+                        <a href="javascript:;">友情链接</a>
+                    </p>
+                    <p>CopyRight &copy; 网上书城</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const vm = new Vue({
+        el: "#app",
+        data: {
+            userId: "",
+            // 订单列表
+            selectedItemList: [],
+            orderItems:[],
+            // 选中了的购物项列表
+            // selectedItemList: []
+            // orderItems:[
+            //     {
+            //         "id": "1521453234058727446",
+            //         "userId": "1669170449545728002",
+            //         "name": "神经网络与深度学习",
+            //         "author": "邱锡鹏",
+            //         "publisher": "机械工业出版社",
+            //         "price": 96.9,
+            //         "imageName": "//img3m1.ddimg.cn/37/12/28538371-1_w_17.jpg",
+            //         "description": "豆瓣评分9.5!复旦大学邱锡鹏教授力作，周志华、李航联袂推荐！深受好评的深度学习讲义蒲公英书正式版！系统整理深度学习的知识体系，由浅入深地阐述深度学习的原理、模型以及方法。更适合中文读者的深度学习图书",
+            //         "number": 1,
+            //         "createTime": "2023-06-16 10:26:08",
+            //         "updateTime": "2023-06-16 10:26:08",
+            //         "sendfrom":"北京",
+            //         "sendto":"我的地址",
+            //         "supplier":"兴华"
+            //     },
+            //     {
+            //         "id": "1521453234014171788",
+            //         "userId": "1669170449545728002",
+            //         "name": "哲人石丛书珍藏版08·大流感：最致命瘟疫的史诗（比尔·盖茨推荐！张文宏医生、！）",
+            //         "author": "约翰·M·巴里",
+            //         "publisher": "上海科技教育出版社",
+            //         "price": 90.2,
+            //         "imageName": "//img3m0.ddimg.cn/70/31/25340110-1_w_8.jpg",
+            //         "description": "美国科学院年度医学类图书，时代楷模钟扬领衔译著！重温1918大流感历史教训，反思现代社会传染病应对之策，如果新一轮疫情必不可免，我们是否做好了准备？世卫组织前副总干事胡庆澧、著名流行病学家俞顺章推荐！",
+            //         "number": 1,
+            //         "createTime": "2023-06-16 10:26:06",
+            //         "updateTime": "2023-06-16 10:26:06",
+            //         "sendfrom":"北京",
+            //         "sendto":"我的地址",
+            //         "supplier":"兴华"
+            //     }
+            // ]
+        },
+        methods: {
+
+            // 获取所有被选中的购物项
+            handleSelectionChange(items) {
+                this.selectedItemList = items;
+            },
+            // 获取订单列表
+            getAllOrderItems() {
+                let userInfo = JSON.parse(localStorage.getItem("userInfo"));
+                if (userInfo) {
+                    this.userId = userInfo.id;
+                    axios({
+                        method: "GET",
+                        url: "/orderShip/list?id=" + userInfo.id
+                    }).then(res => {
+                        if (res.data.code == "1") {
+                            this.orderItems = res.data.data;
+                        } else {
+                            this.$message({
+                                type: "error",
+                                message: res.data.msg,
+                                duration: "2000",
+                                onClose: () => {
+                                    location.href = "../login/login.html";
+                                }
+                            })
+                        }
+                    })
+                } else {
+                    this.$message({
+                        type: "error",
+                        message: "请先登录",
+                        duration: "2000",
+                        onClose: () => {
+                            location.href = "../login/login.html";
+                        }
+                    })
+                }
+
+            },
+            // 图书收货
+            GottenItem(row) {
+
+                // 1. 确定是否收货
+                this.$confirm(`您确定要收货【${row.name}】图书吗?`, '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
+                    // 2. 收货对应图书项
+                    axios({
+                        method: "post",
+                        url: "/orderShip/gottenOne?ids=" + row.id,
+                        data: JSON.stringify(row),
+                        headers: {
+                            "Content-Type": "application/json; charset=utf-8"
+                        }
+                    }).then(res => {
+                        if (res.data.code == "1") {
+
+                            // 2.1 收货成功提示
+                            this.$message({
+                                type: 'success',
+                                message: '收货成功!'
+                            });
+                        } else {
+                            console.log(res)
+                            // 2.2 收货失败提示
+                            this.$message({
+                                type: 'error',
+                                message: '收货失败!'
+                            });
+                        }
+                        // 3. 重新发送请求获取订单列表
+                        this.getAllOrderItems();
+                    })
+                }).catch(() => {
+                    // 3. 点击取消按钮提示
+                    this.$message({
+                        type: 'info',
+                        message: '已取消收货'
+                    });
+                });
+            },
+            // 批量收货
+            batchGotten() {
+                if (this.selectedItemList.length <= 0) {
+                    return;
+                }
+                // 1. 确定是否收货
+                this.$confirm('您确定要收货这' + this.selectedItemList.length + '个购物项吗?', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
+                    let ids = [];
+                    this.selectedItemList.forEach(item => {
+                        ids.push(item.id);
+                    });
+                    // 2. 收货对应图书项
+                    axios({
+                        method: "post",
+                        url: "/orderShip/gottenBatch?ids=" + ids.join(",")
+                    }).then(res => {
+                        if (res.data.code == "1") {
+
+                            // 2.1 收货成功提示
+                            this.$message({
+                                type: 'success',
+                                message: '收货成功!'
+                            });
+                        } else {
+                            console.log(res)
+                            // 2.2 收货失败提示
+                            this.$message({
+                                type: 'error',
+                                message: '收货失败!'
+                            });
+                        }
+                        // 3. 重新发送请求获取订单列表
+                        this.getAllOrderItems();
+                    })
+                }).catch(() => {
+                    // 3. 点击取消按钮提示
+                    this.$message({
+                        type: 'info',
+                        message: '已取消收货'
+                    });
+                });
+            },
+            showCurPage(){
+                // 获取当前页面的url
+                let currentUrl = window.location.href;
+                // 获取所有的导航链接
+                let navLinks = document.querySelectorAll('.nav-item');
+
+                // 根据当前url设置激活状态
+                navLinks.forEach(link => {
+                    if (currentUrl.indexOf(link.href)!="-1") {
+                        link.classList.add('active');
+                    }
+                });
+            }
+        },
+        computed: {
+            // 总价格
+            totalPrice() {
+                return this.selectedItemList.reduce((sum, item) => {
+                    sum = parseFloat(sum);
+                    let price = parseFloat(item.price);
+                    let number = parseFloat(item.number);
+                    sum += (price * number);
+                    return sum.toFixed(2);
+                }, 0);
+            },
+        },
+        created(){
+            this.getAllOrderItems();
+        },
+        mounted(){
+            this.showCurPage();
+        }
+    })
+</script>
+</body>
+</html>

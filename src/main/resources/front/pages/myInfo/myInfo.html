@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>我的信息</title>
+    <link rel="shortcut icon" href="../../favicon.ico">
+    <link rel="stylesheet" href="../../style/cart/shoppingCart.css">
+    <script type="text/javascript" src="../../plugins/jQuery/jquery-3.6.0.js"></script>
+    <script type="text/javascript" src="../../plugins/vue/vue.js"></script>
+    <script type="text/javascript" src="../../plugins/axios/axios.js"></script>
+    <!-- 引入样式 -->
+    <link rel="stylesheet" href="../../plugins/element-ui/index.css">
+    <!-- 引入组件库 -->
+    <script src="../../plugins/element-ui/index.js"></script>
+    <!-- 引入layer -->
+    <script src="../../plugins/layer-master/dist/layer.js"></script>
+    <style>
+        .el-table {
+            margin: 0 auto;
+        }
+
+        .multi-line-cell {
+            white-space: normal !important;
+            word-break: break-all;
+            word-wrap: break-word;
+        }
+
+    </style>
+    <style>
+        .user-info {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .text {
+            font-size: 14px;
+        }
+
+        .item {
+            margin-bottom: 18px;
+        }
+
+        .clearfix:before,
+        .clearfix:after {
+            display: table;
+            content: "";
+        }
+
+        .clearfix:after {
+            clear: both
+        }
+
+        .box-card {
+            width: 680px;
+            margin: 0 auto;
+        }
+    </style>
+    <style>
+        .nav-item.active {
+            color: orange;
+        }
+    </style>
+</head>
+<body>
+<div id="app">
+    <nav class="public-header">
+        <a class="nav-item" href="../../index.html">网站首页</a>
+        <a class="nav-item" href="../cart/shoppingCart.html">购物车</a>
+        <a class="nav-item" href="../myorder/myorder.html">我的订单</a>
+        <a class="nav-item" href="../myInfo/myInfo.html">我的信息</a>
+    </nav>
+    <div class="cart">
+        <template>
+            <div class="user-info">
+                <el-card class="box-card">
+                    <div slot="header" class="clearfix">
+                        <span>我的信息</span>
+                        <el-button style="float: right; padding: 3px 0" type="text" @click="dialogFormVisible = true">
+                            修改信息
+                        </el-button>
+                    </div>
+                    <div class="text item">
+                        <el-form ref="form" :disabled="true" :model="form" label-width="80px">
+                            <el-form-item label="个人id">
+                                <el-input v-model="form.id"></el-input>
+                            </el-form-item>
+                        </el-form>
+
+                        <el-form ref="form" :disabled="true" :model="form" label-width="80px">
+                            <el-form-item label="账户">
+                                <el-input v-model="form.username"></el-input>
+                            </el-form-item>
+
+                        </el-form>
+                        <el-form ref="form" :disabled="true" :model="form" label-width="80px">
+                            <el-form-item label="手机">
+                                <el-input v-model="form.phone"></el-input>
+                            </el-form-item>
+
+                        </el-form>
+                        <el-form ref="form" :disabled="true" :model="form" label-width="80px">
+                            <el-form-item label="邮箱">
+                                <el-input v-model="form.email"></el-input>
+                            </el-form-item>
+
+                        </el-form>
+                        <el-form ref="form" :disabled="true" :model="form" label-width="80px">
+                            <el-form-item label="个人住址">
+                                <el-input v-model="form.address"></el-input>
+                            </el-form-item>
+
+                        </el-form>
+                        <el-form ref="form" :disabled="true" :model="form" label-width="80px">
+                            <el-form-item label="创建时间">
+                                <el-input v-model="form.createTime"></el-input>
+                            </el-form-item>
+
+                        </el-form>
+                        <el-form ref="form" :disabled="true" :model="form" label-width="80px">
+                            <el-form-item label="最近更改时间">
+                                <el-input v-model="form.updateTime"></el-input>
+                            </el-form-item>
+                        </el-form>
+                    </div>
+                </el-card>
+                <div>
+                    <el-dialog title="修改信息" :visible.sync="dialogFormVisible">
+                        <div class="text item">
+                            <el-form ref="form" :disabled="true" :model="form" label-width="80px">
+                                <el-form-item label="个人id">
+                                    <el-input v-model="form.id"></el-input>
+                                </el-form-item>
+                            </el-form>
+
+                            <el-form ref="form" :model="form" label-width="80px">
+                                <el-form-item label="账户">
+                                    <el-input v-model="form.username"></el-input>
+                                </el-form-item>
+
+                            </el-form>
+
+                            <el-form ref="form" :model="form" label-width="80px">
+                                <el-form-item label="密码">
+                                    <el-input type="password" v-model="form.password"></el-input>
+                                </el-form-item>
+                            </el-form>
+
+                            <el-form ref="form" :model="form" label-width="80px">
+                                <el-form-item label="手机">
+                                    <el-input v-model="form.phone"></el-input>
+                                </el-form-item>
+
+                            </el-form>
+                            <el-form ref="form" :model="form" label-width="80px">
+                                <el-form-item label="邮箱">
+                                    <el-input v-model="form.email"></el-input>
+                                </el-form-item>
+
+                            </el-form>
+                            <el-form ref="form" :model="form" label-width="80px">
+                                <el-form-item label="个人住址">
+                                    <el-input v-model="form.address"></el-input>
+                                </el-form-item>
+
+                            </el-form>
+
+
+                        </div>
+
+                        <div slot="footer" class="dialog-footer">
+                            <el-button @click="dialogFormVisible = false">取 消</el-button>
+                            <el-button type="primary" @click="updateUserInfo(form)">确 定</el-button>
+                        </div>
+                    </el-dialog>
+                </div>
+
+            </div>
+        </template>
+        <!-- 页脚部分 -->
+        <div class="extra">
+            <div class="wrapper">
+                <!-- 版权信息 -->
+                <div class="copyright">
+                    <p>
+                        <a href="javascript:;">关于我们</a>
+                        <a href="javascript:;">帮助中心</a>
+                        <a href="javascript:;">售后服务</a>
+                        <a href="javascript:;">配送与验收</a>
+                        <a href="javascript:;">商务合作</a>
+                        <a href="javascript:;">搜索推荐</a>
+                        <a href="javascript:;">友情链接</a>
+                    </p>
+                    <p>CopyRight &copy; 网上书城</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const vm = new Vue({
+        el: "#app",
+        data: {
+            // form: {
+            //     id: '',
+            //     username: '',
+            //     phone: '',
+            //     email: '',
+            //     address: '',
+            //     createTime: '',
+            //     updateTime: '',
+            // },
+            form: {
+                address: "xx省xx市xx县xxx村x组xxx号",
+                createTime: "2023-06-15 10:30:22",
+                email: "",
+                id: "1669170449545728002",
+                phone: "13812345678",
+                status: 1,
+                updateTime: "2023-06-15 10:30:22",
+                username: "123",
+                password: ""
+            },
+            dialogFormVisible: false,
+            formLabelWidth: '120px'
+
+        },
+        methods: {
+
+
+            updateUserInfo(form) {
+                // 1. 确定是否更改个人信息
+                this.$confirm(`您确定要修改个人信息吗?`, '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
+                    // 2. 更改个人信息
+                    axios({
+                        method: "post",
+                        url: "/user/costumUpgrade?ids=" + form.id,
+                        data: JSON.stringify(form),
+                        headers: {
+                            "Content-Type": "application/json; charset=utf-8"
+                        }
+                    }).then(res => {
+                        if (res.data.code == "1") {
+                            // 2.1 修改成功提示
+                            this.$message({
+                                type: 'success',
+                                message: '修改成功!',
+                            })
+                            this.$nextTick(() => {
+                                console.log(res.data.data)
+                                localStorage.setItem("userInfo", JSON.stringify(res.data.data));
+                            });
+                        } else {
+                            console.log(res)
+                            // 2.2 修改失败提示
+                            this.$message({
+                                type: 'error',
+                                message: res.data.msg,
+                            });
+                            this.$nextTick(() => {
+                                console.log(res.data.msg)
+                                this.getUserInfo()
+                            });
+                        }
+
+                    })
+                }).catch(() => {
+
+                    // 3. 点击取消按钮提示
+                    this.$message({
+                        type: 'info',
+                        message: '已取消修改'
+                    });
+
+                });
+            },
+            getUserInfo() {
+                // 从localStorage中获取保存的对象
+                let userInfo = JSON.parse(localStorage.getItem("userInfo"));
+                if (userInfo) {
+                    // 拷贝属性到form对象中
+                    Object.keys(userInfo).forEach(key => {
+                        this.form[key] = userInfo[key];
+                    });
+                    // console.log(this.form)
+                } else {
+                    location.href = "../login/login.html";
+                }
+            },
+            showCurPage() {
+                // 获取当前页面的url
+                let currentUrl = window.location.href;
+                // 获取所有的导航链接
+                let navLinks = document.querySelectorAll('.nav-item');
+
+                // 根据当前url设置激活状态
+                navLinks.forEach(link => {
+                    if (currentUrl.indexOf(link.href) != "-1") {
+                        link.classList.add('active');
+                    }
+                });
+            }
+        },
+        created() {
+            this.getUserInfo();
+        },
+        mounted() {
+            this.showCurPage();
+        },
+
+    })
+</script>
+</body>
+</html>

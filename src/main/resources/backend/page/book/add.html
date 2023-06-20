@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- 引入vue -->
+    <script type="text/javascript" src="../../plugins/vue/vue.js"></script>
+    <!-- 引入axios -->
+    <script type="text/javascript" src="../../plugins/axios/axios.min.js"></script>
+    <!-- 引入element-ui -->
+    <script type="text/javascript" src="../../plugins/element-ui/index.js"></script>
+    <link rel="stylesheet" href="../../plugins/element-ui/index.css"/>
+    <!-- 引入自定义的js文件 -->
+    <script type="text/javascript" src="../../js/index.js"></script>
+    <script type="text/javascript" src="../../api/book.js"></script>
+    <script type="text/javascript" src="../../js/request.js"></script>
+    <script type="text/javascript" src="../../js/validate.js"></script>
+    <!-- 引入自定义的css文件 -->
+    <link rel="stylesheet" href="../../styles/common.css"/>
+    <link rel="stylesheet" href="../../styles/book.css"/>
+    <title>添加图书</title>
+    <style>
+        .addBrand-container {
+            width: 1000px;
+        }
+    </style>
+</head>
+<body>
+<div id="book-add-app" class="addBrand-container">
+    <el-form ref="bookForm" :model="bookForm" label-width="500px" label-position="right" :rules="rules">
+        <el-form-item label="图书名称" prop="name">
+            <el-input v-model="bookForm.name"></el-input>
+        </el-form-item>
+
+        <el-form-item label="图书分类" prop="categoryId">
+            <el-select v-model="bookForm.categoryId" placeholder="请选择图书所属分类">
+                <el-option v-for="item in categoryList" :key="item.id" :label="item.name" :value="item.id"></el-option>
+            </el-select>
+        </el-form-item>
+
+        <el-form-item label="作者" prop="author">
+            <el-input v-model="bookForm.author"></el-input>
+        </el-form-item>
+
+        <el-form-item label="出版社" prop="publisher">
+            <el-input v-model="bookForm.publisher"></el-input>
+        </el-form-item>
+
+        <el-form-item label="售价" prop="price">
+            <el-input v-model="bookForm.price"></el-input>
+        </el-form-item>
+
+        <el-form-item label="图书描述" prop="description">
+            <el-input width="500px" type="textarea" :rows="6" placeholder="图书描述，最长200个字" maxlength="200"
+                      v-model="bookForm.description"></el-input>
+        </el-form-item>
+
+        <el-form-item>
+            <el-button @click="goBack">取消</el-button>
+            <el-button type="primary" @click="submitForm">保存</el-button>
+            <el-button v-if="actionType === 'add'" @click="submitForm(1)">保存并继续添加菜品</el-button>
+        </el-form-item>
+    </el-form>
+</div>
+
+<script>
+    new Vue({
+        el: "#book-add-app",
+        data() {
+            return {
+                // 用来标志是新增图书还是修改图书
+                actionType: "",
+                // 要修改图书的id
+                bookId: "",
+                // 图书分类列表
+                categoryList: [],
+                // 表单
+                bookForm: {
+                    name: "",
+                    author: "",
+                    publisher: "",
+                    price: "",
+                    description: "",
+                    categoryId: ""
+                }
+            }
+        },
+        methods: {
+            // 获取图书分类列表方法
+            getCategoryListFn() {
+                getCategoryList().then(res => {
+                    this.categoryList = res.data;
+                })
+            },
+            // 退回到图书展示列表
+            goBack() {
+                window.parent.menuHandle({
+                    id: '4',
+                    url: '/backend/page/book/list.html',
+                    name: '图书管理'
+                }, false)
+            },
+            init() {
+                // 获取图书分类信息
+                this.getCategoryListFn();
+                // 若为编辑图书，则发送请求获取数据回显到页面上
+                if (this.actionType === "edit") {
+                    queryBookById(this.bookId).then(res => {
+                        if (String(res.code) === "1") {
+                            // 将图书信息保存到表单中
+                            this.bookForm = res.data;
+                        }
+                    })
+                }
+            },
+            // 提交表单
+            submitForm(flag) {
+                // 保存表单
+                this.$refs["bookForm"].validate(res => {
+                    if (res) {
+                        submitForm(this.bookForm, this.actionType).then(res => {
+                            if (String(res.code) === "1") {
+                                if (this.actionType === "edit" || flag !== 1) {
+                                    this.$message({
+                                        message: res.msg,
+                                        duration: "1000",
+                                        type: "success",
+                                        onClose: () => {
+                                            this.goBack();
+                                        }
+                                    });
+                                } else {
+                                    this.$message({
+                                        message: res.msg,
+                                        duration: "1000",
+                                        type: "success",
+                                    });
+                                    this.bookForm = {};
+                                }
+                            } else {
+                                this.$message({
+                                    message: res.msg,
+                                    duration: "1500",
+                                    type: "error",
+                                })
+                            }
+                        })
+                    }
+                });
+            },
+
+        },
+        created() {
+            // 获取url中查询字符串的id，若id不为空则是修改图书，为空就是新增图书
+            this.bookId = requestUrlParam("id");
+            // 判断此时是新增图书还是修改图书
+            this.actionType = this.bookId ? 'edit' : 'add';
+            // 初始化
+            this.init();
+        }
+        ,
+        computed: {
+            rules() {
+                return {
+                    name: [{required: true, message: "请填写图书名称", trigger: 'blur'}],
+                    author: [{required: true, message: "请填写作者", trigger: 'blur'}],
+                    publisher: [{required: true, message: "请填写出版社", trigger: 'blur'}],
+                    price: [{required: true, message: "请填写图书价格", trigger: 'blur'}],
+                    categoryId: [{required: true, message: "请选择图书分类", trigger: 'change'}],
+                }
+            }
+        }
+    })
+</script>
+</body>
+</html>

@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>更多书籍</title>
+    <link rel="stylesheet" href="../../style/more/bootstrap.min.css">
+    <link rel="stylesheet" href="../../style/more/indexStyle.css">
+    <link rel="stylesheet" href="../../style/more/more.css">
+    <link rel="shortcut icon" href="./../../favicon.ico">
+    <script type="text/javascript" src="../../plugins/jQuery/jquery-3.6.0.js"></script>
+    <script src=" https://cdn.staticfile.org/vue/2.2.2/vue.min.js"></script>
+    <script type="text/javascript" src="../../plugins/axios/axios.js"></script>
+    <!-- 引入样式 -->
+    <link rel="stylesheet" href="../../plugins/element-ui/index.css">
+    <!-- 引入组件库 -->
+    <script src="../../plugins/element-ui/index.js"></script>
+    <script src="../../plugins/layer-master/dist/layer.js"></script>
+    <style>
+        .nav-item.active {
+            color: orange;
+        }
+    </style>
+</head>
+
+<body>
+<div id="app">
+    <nav class="public-header">
+        <a class="nav-item" href="../../index.html">网站首页</a>
+        <a class="nav-item" href="../cart/shoppingCart.html">购物车</a>
+        <a class="nav-item" href="../myorder/myorder.html">我的订单</a>
+        <a class="nav-item" href="../myInfo/myInfo.html">我的信息</a>
+    </nav>
+    <div class="container">
+        <!-- 搜索框区域 -->
+        <div class="row ssq">
+            <div>
+                <div class="col-md-3" style="font-size: 38px;text-align: center;">
+                        <span style="font-family:'华文行楷'">{{bookname}}<span v-if="searchShow"
+                                                                               style="font-size:18px">共{{booklist.length}}条记录</span></span>
+                </div>
+                <div class="col-md-5 col-md-offset-2">
+                    <div class="input-group input-group-lg">
+                        <input type="text" class="form-control" placeholder="生命唯愿爱与自由"
+                               aria-describedby="basic-addon2">
+                        <span class="input-group-btn" id="basic-addon2">
+                                <button class="btn btn-default" id="query">搜索</button>
+                            </span>
+                    </div>
+                </div>
+            </div>
+            <!-- /.col-lg-6 -->
+        </div>
+
+        <div class="container">
+            <ul class="media-list">
+                <li class="media" v-for="(item,index) in booklist">
+                    <div class="media-left">
+                        <a href="#" class="media-left-a">
+                            <img class="media-object more_media_img" :src=`http:${item.imageName}` alt="...">
+                        </a>
+                    </div>
+
+
+                    <div class="media-body" style="overflow:visible">
+                        <h4 class="media-heading"><span class="name">{{item.name}}</span></h4>
+                        <span class="description">{{item.description}}</span>
+
+                        <h4 class="address"><span class="author">{{item.author}}</span>&nbsp;&nbsp; <span
+                                style="color:gray">/</span><span style="font-size:16px"
+                                                                 class="publisher">&nbsp;&nbsp;{{item.publisher}}</span>
+                        </h4>
+
+                        <p id="jg">￥{{item.price}}</p>
+                        <button @click="addCart(index)"
+                                :class="[ !item.show == show ? isactive ==index?'btn class2': 'btn gw-btn':'btn class2'] ">
+                            <i
+                                    class="fa fa-cart-plus"></i>&nbsp;&nbsp;{{item.show ? "此书已在购物车中" : "加入购物车"}}
+                        </button>
+                        <!-- <button  @click="addCart(index)"   v-show="show" class="btn class2" ><i class="fa fa-cart-plus"></i>&nbsp;&nbsp;该书已在购物车中</button> -->
+
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <div class="extra">
+        <div class="wrapper">
+            <!-- 版权信息 -->
+            <div class="copyright">
+                <p>
+                    <a href="javascript:;">关于我们</a>
+                    <a href="javascript:;">帮助中心</a>
+                    <a href="javascript:;">售后服务</a>
+                    <a href="javascript:;">配送与验收</a>
+                    <a href="javascript:;">商务合作</a>
+                    <a href="javascript:;">搜索推荐</a>
+                    <a href="javascript:;">友情链接</a>
+                </p>
+                <p>CopyRight &copy; 小兔鲜儿</p>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    // 取消vue的开发模式
+    Vue.config.productionTip = false;
+
+    var vm = new Vue({
+        el: '#app',
+        data: {
+            bookname: '', //标题名字
+            booklist: [], //图书信息列表
+            categoryId: '', // 分类id
+            url: '/category/', //网址，
+            gouwulist: [], //用户购物车信息
+            show: true, //购物车颜色的显示
+            cartText: "加入购物车", //购车图标内文字显示
+            isactive: -1,
+            searchShow: false, //通过搜索来显示的内容
+        },
+        methods: {
+            //新鲜好书
+            getmore() {
+                axios({
+                    method: "GET",
+                    url: "/book/page/1/30"
+                }).then(res => {
+                    if (String(res.data.code) === '1') {
+                        this.booklist = res.data.data.records
+                        this.setuserName();
+                    } else {
+                        layer.msg(res.data.msg, {
+                            icon: 2,
+                            offset: 't',
+                            anim: 6
+                        });
+                    }
+                })
+            },
+
+            // 分类获得所有图书信息
+            getBOOkmore() {
+                axios({
+                    method: "GET",
+                    url: this.url + this.categoryId
+                }).then(res => {
+                    if (String(res.data.code) === '1') {
+                        this.booklist = res.data.data.bookList
+                        this.booklist.show = false;
+                    } else {
+                        layer.msg(res.data.msg, {
+                            icon: 2,
+                            offset: 't',
+                            anim: 6
+                        });
+                    }
+                })
+            },
+            //判断用户是否登录以及购物车信息
+            setuserName() {
+                axios({
+                    method: "GET",
+                    url: "/user/isLogin"
+                }).then(res => {
+                    if (res.data.code == "1") {
+                        this.userId = JSON.parse(localStorage.getItem("userInfo")).id
+                        axios({
+                            method: "GET",
+                            url: "/cart/list?id=" + this.userId,
+                        }).then(res => {
+                            if (String(res.data.code) === '1') {
+                                this.gouwulist = res.data.data
+                            }
+                        })
+                    }
+                })
+            },
+            //添加书籍到购物车
+            addCart(index) {
+                axios({
+                    method: "POST",
+                    url: "/cart",
+                    data: {
+                        ...this.booklist[index],
+                        userId: this.userId
+                    }
+                }).then(res => {
+                    if (String(res.data.code) === '1') {
+                        this.$message({
+                            message: '添加购物车成功！',
+                            type: 'success',
+                            duration: 1000
+                        });
+                        this.booklist[index].show = true
+                        this.isactive = index
+                    } else {
+                        this.$message({
+                            message: res.data.msg,
+                            type: 'error',
+                            duration: 1000
+                        });
+                    }
+                })
+            },
+            //搜索功能的实现
+            SearchForContent() {
+                axios({
+                    method: "GET",
+                    url: "/book/search/1/10?key=" + this.categoryId,
+                }).then(res => {
+                    if (String(res.data.code) === '1') {
+                        this.booklist = res.data.data.records
+                        this.booklist.show = false;
+                        this.searchShow = true
+                    } else {
+                        layer.msg(res.data.msg, {
+                            icon: 2,
+                            offset: 't',
+                            anim: 6
+                        });
+                    }
+                })
+            },
+            showCurPage(){
+                // 获取当前页面的url
+                let currentUrl = window.location.href;
+                // 获取所有的导航链接
+                let navLinks = document.querySelectorAll('.nav-item');
+
+                // 根据当前url设置激活状态
+                navLinks.forEach(link => {
+                    if (currentUrl.indexOf(link.href)!="-1") {
+                        link.classList.add('active');
+                    }
+                });
+            }
+        },
+        created() {
+            // 获取查询url中查询字符串中的id
+            let search = window.location.search.substring(1);
+            queryArr = search.split("&");
+            let queryObj = {};
+            for (query of queryArr) {
+                let [key, value] = query.split("=");
+                queryObj[key] = value;
+            }
+            this.categoryId = queryObj.id;
+            Bookitem = localStorage.getItem("book");
+            this.bookname = Bookitem
+            switch (Bookitem) {
+                case "新鲜好书":
+                    this.getmore();
+                    break;
+                case '科技':
+                case '文学':
+                case '艺术':
+                case '小说':
+                case '历史':
+                case '管理学':
+                case '成功励志':
+                case '哲学宗教':
+                    this.getBOOkmore();
+                    break;
+                default:
+                    this.SearchForContent();
+                    break;
+            }
+            //获取购物车信息
+            this.setuserName()
+            // 所有信息中查找重复值
+            // this.Cartshow()
+        },
+        mounted() {
+            // 搜索框的文字变红
+            setTimeout(() => {
+                this.$nextTick(function () {
+                    var inputvalue = decodeURI(this.categoryId)
+                    for (let i = 0; i < this.booklist.length; i++) {
+                        if (this.booklist[i].author.indexOf(inputvalue) >= 0) {
+                            var values = this.booklist[i].author.split(inputvalue).join(
+                                '<span style="color:red;">' + inputvalue + "</span>");
+                            $(".author")[i].innerHTML = values;
+                        }
+
+                        if (this.booklist[i].description.indexOf(inputvalue) >= 0) {
+                            var values = this.booklist[i].description.split(inputvalue).join(
+                                '<span style="color:red;">' + inputvalue + "</span>");
+                            $(".description")[i].innerHTML = values;
+                        }
+
+                        if (this.booklist[i].publisher.indexOf(inputvalue) >= 0) {
+                            var values = this.booklist[i].publisher.split(inputvalue).join(
+                                '<span style="color:red;">' + inputvalue + "</span>");
+                            $(".publisher")[i].innerHTML = values;
+                        }
+
+                        if (this.booklist[i].name.indexOf(inputvalue) >= 0) {
+                            var values = this.booklist[i].name.split(inputvalue).join(
+                                '<span style="color:red;">' + inputvalue + "</span>");
+                            $(".name")[i].innerHTML = values;
+                        }
+                    }
+                })
+            }, 200);
+
+            this.showCurPage();
+        },
+    });
+</script>
+</body>
+
+</html>

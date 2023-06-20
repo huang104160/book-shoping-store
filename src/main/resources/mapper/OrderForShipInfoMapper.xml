@@ -1,0 +1,54 @@
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.xuxu.bookstore.mapper.OrderForShipInfoMapper">
+
+    <resultMap id="OrderForShipInfoVoResultMap" type="com.xuxu.bookstore.vo.OrderForShipInfoVo">
+        <result column="id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="name" property="name"/>
+        <result column="author" property="author"/>
+        <result column="publisher" property="publisher"/>
+        <result column="price" property="price"/>
+        <result column="image_name" property="imageName"/>
+        <result column="description" property="description"/>
+        <result column="number" property="number"/>
+        <result column="shipment_date" property="createTime"/>
+<!--        <result column="shipment_date" property="updateTime"/>  收货日期不需要在查询的时候映射-->
+        <result column="send_from" property="sendfrom"/>
+        <result column="send_to" property="sendto"/>
+        <result column="supplier_name" property="supplier"/>
+    </resultMap>
+
+    <select id="findOrderForShipInfo" resultMap="OrderForShipInfoVoResultMap" parameterType="java.util.Map">
+        SELECT DISTINCT oi.id , b.name, b.author, b.publisher, b.price, b.image_name, b.description,
+               oi.number, s.shipment_date, s.send_from, s.send_to, b.supplier_name
+        FROM `order` o
+                 JOIN order_item oi ON o.id = oi.order_id
+                 JOIN book b ON b.id = oi.book_id
+                 JOIN shipments s ON s.order_item_id = oi.id
+        WHERE o.`status` = #{status} and o.user_id = #{userId} and oi.is_deleted = 0
+    </select>
+
+
+
+    <select id="findShippedOrders" resultType="Long">
+        SELECT id
+        FROM `order`
+        WHERE `order`.`status`!=3 and `order`.id in
+        (
+            SELECT DISTINCT order_id FROM order_item
+            WHERE order_id not in
+            (
+                SELECT o.id
+                FROM `order` o
+                JOIN order_item oi ON o.id = oi.order_id
+                WHERE oi.`status` != 3 OR oi.`status` IS NULL
+                GROUP BY o.id
+                HAVING COUNT(oi.`status`) >= 1
+            )
+        )
+    </select>
+
+</mapper>
