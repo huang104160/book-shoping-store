@@ -17,14 +17,23 @@
 
 ## 4. 项目展示
 前台展示页面
+
 ![](.README_images/793259cc.png)
 
 后台管理页面
+
 ![](.README_images/11cba74f.png)
+
 接口文档页面
+
 ![](.README_images/accadd4b.png)
+
 ![](.README_images/5d79441f.png)
 
 ## 5. 致谢
 在下面的项目原有基础上, 添加表设计, 更改表字段, 添加订单模拟生成, 订单收货功能
+
 https://gitee.com/lcy-mayun/online-bookstore
+
+## 6. 说明
+此项目用于小组数据库课程设计, 仅供学习交流使用
