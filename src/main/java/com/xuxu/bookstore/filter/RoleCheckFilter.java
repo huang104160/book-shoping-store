@@ -35,7 +35,7 @@ import java.util.List;
  */
 @Slf4j
 // 登录拦截器，拦截所有路径
-@WebFilter(filterName = "RoleCheckFilter", urlPatterns = "/*")
+@WebFilter(filterName = "RoleCheckFilter", urlPatterns = {"/front/*","/backend/*"})
 public class RoleCheckFilter implements Filter {
 
     @Value("#{'${userRole.adminIds}'.split(',')}") // 获取配置属性并以','分割为列表

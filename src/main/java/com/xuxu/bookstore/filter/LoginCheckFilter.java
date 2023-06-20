@@ -21,8 +21,6 @@ public class LoginCheckFilter implements Filter {
     // 路径匹配器，支持通配符
     public static final AntPathMatcher PATH_MATCHER = new AntPathMatcher();
 
-
-
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
         log.info("我是LoginCheckFilter, 我应该第一个执行");

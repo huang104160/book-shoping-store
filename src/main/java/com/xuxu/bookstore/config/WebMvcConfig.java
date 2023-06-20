@@ -88,7 +88,7 @@ public class WebMvcConfig extends WebMvcConfigurationSupport {
         return new Docket(DocumentationType.SWAGGER_2).
                 apiInfo(apiInfo()).
                 select().
-                apis(RequestHandlerSelectors.basePackage("cn.hbpu.bookstore.controller")).
+                apis(RequestHandlerSelectors.basePackage("com.xuxu.bookstore.controller")).
                 paths(PathSelectors.any()).
                 build();
     }
