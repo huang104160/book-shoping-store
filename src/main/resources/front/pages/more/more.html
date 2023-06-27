@@ -75,9 +75,8 @@
 
                         <p id="jg">￥{{item.price}}</p>
                         <button @click="addCart(index)"
-                                :class="[ !item.show == show ? isactive ==index?'btn class2': 'btn gw-btn':'btn class2'] ">
-                            <i
-                                    class="fa fa-cart-plus"></i>&nbsp;&nbsp;{{item.show ? "此书已在购物车中" : "加入购物车"}}
+                                :class="[ !item.show == show ? (isactive == index?'btn class2': 'btn gw-btn'):'btn class2'] ">
+                            <i class="fa fa-cart-plus"></i>&nbsp;&nbsp;{{item.status == 1 ? (item.show ? "此书已在购物车中" : "加入购物车") : "该书已下架"}}
                         </button>
                         <!-- <button  @click="addCart(index)"   v-show="show" class="btn class2" ><i class="fa fa-cart-plus"></i>&nbsp;&nbsp;该书已在购物车中</button> -->
 
@@ -180,6 +179,10 @@
             },
             //添加书籍到购物车
             addCart(index) {
+                if(this.booklist[index].status == 0){
+                    alert("该书已下架, 无法加入到购物车")
+                    return;
+                }
                 axios({
                     method: "POST",
                     url: "/cart",
@@ -224,7 +227,7 @@
                     }
                 })
             },
-            showCurPage(){
+            showCurPage() {
                 // 获取当前页面的url
                 let currentUrl = window.location.href;
                 // 获取所有的导航链接
@@ -232,7 +235,7 @@
 
                 // 根据当前url设置激活状态
                 navLinks.forEach(link => {
-                    if (currentUrl.indexOf(link.href)!="-1") {
+                    if (currentUrl.indexOf(link.href) != "-1") {
                         link.classList.add('active');
                     }
                 });
